@@ -1,12 +1,12 @@
 # ANüikii
 
-Aplicación móvil hecha con Flutter para apoyar el aprendizaje de vocabulario técnico en inglés de los aprendices del SENA, especialmente en la Regional La Guajira. Esta primera versión reúne consulta de términos, reconocimiento visual y funciones institucionales relacionadas con el perfil y las búsquedas.
+Aplicación móvil hecha con Flutter para apoyar el aprendizaje de vocabulario técnico en inglés de los aprendices del SENA, especialmente en la Regional La Guajira. Esta primera versión reúne consulta de términos, una interfaz de reconocimiento visual y funciones institucionales relacionadas con el perfil y las búsquedas.
 
-> **Estado:** primera versión funcional en desarrollo y validación. No asumir que está lista para publicación o despliegue institucional. La app depende de servicios externos y el backend no está incluido en este repositorio.
+> **Estado de v1.0.0:** release inicial para pruebas y validación institucional, no para distribución amplia. El análisis visual con IA está temporalmente deshabilitado hasta integrarlo mediante un backend seguro; el backend institucional tampoco está incluido en este repositorio.
 
 ## ¿Para qué sirve la app?
 
-El aprendiz puede enfocar un objeto con la cámara y consultar su nombre en español e inglés, una guía escrita de pronunciación y ejemplos de uso en pasado, presente y futuro. También puede escuchar en inglés el término y las oraciones. La aplicación conserva un historial de consultas y muestra rankings institucionales de programas, fichas y aprendices.
+Cuando el análisis visual esté habilitado, el aprendiz podrá enfocar un objeto con la cámara y consultar su nombre en español e inglés, una guía escrita de pronunciación y ejemplos de uso en pasado, presente y futuro. También podrá escuchar en inglés el término y las oraciones. La aplicación conserva un historial de consultas y muestra rankings institucionales de programas, fichas y aprendices.
 
 El inicio de sesión permite asociar las búsquedas con el usuario institucional. En la pantalla de inicio se presenta información del perfil y, cuando hay datos disponibles, la posición de la ficha del aprendiz dentro del ranking del programa.
 
@@ -15,7 +15,7 @@ El inicio de sesión permite asociar las búsquedas con el usuario institucional
 - Inicio de sesión institucional y cierre de sesión.
 - Restauración local de la sesión, perfil e historial.
 - Inicio con información del perfil y glosario técnico de ejemplo.
-- Cámara para capturar un objeto y pedir a IA el resultado bilingüe.
+- Interfaz de cámara para capturar un objeto; el análisis con IA está deshabilitado en este release.
 - Pronunciación escrita, ejemplos en tres tiempos verbales y lectura en voz alta.
 - Historial de términos consultados.
 - Ranking por programas, fichas y aprendices.
@@ -27,11 +27,11 @@ El inicio de sesión permite asociar las búsquedas con el usuario institucional
 
 1. El usuario inicia sesión con su número de documento y contraseña institucional.
 2. Desde la navegación inferior abre la cámara y toma una foto del objeto.
-3. La imagen se envía al servicio de IA, que debe devolver un JSON con `objeto_esp`, `objeto_eng`, `pronunciacion`, `oracion_pasado`, `oracion_presente` y `oracion_futuro`.
-4. La app presenta el resultado y lo registra en el historial del usuario mediante el backend.
-5. El usuario puede escuchar el término o las oraciones, consultar su historial o explorar los rankings.
+3. **En esta versión, el análisis de la foto no está disponible.** Al reactivar la función mediante un backend seguro, la respuesta deberá incluir `objeto_esp`, `objeto_eng`, `pronunciacion`, `oracion_pasado`, `oracion_presente` y `oracion_futuro`.
+4. Con el análisis habilitado, la app podrá presentar el resultado y registrarlo en el historial del usuario mediante el backend.
+5. El usuario puede consultar su historial y explorar los rankings; la lectura en voz alta funciona cuando hay texto disponible.
 
-La respuesta de IA se procesa como JSON; si el proveedor devuelve texto que no pueda decodificarse, la consulta no se mostrará correctamente. Para cambiar este contrato, coordinar los cambios entre el prompt, la pantalla de cámara y el backend.
+Cuando se reactive el análisis, la respuesta de IA se procesará como JSON; si el proveedor devuelve texto que no pueda decodificarse, la consulta no se mostrará correctamente. Para cambiar este contrato, coordinar los cambios entre el prompt, la pantalla de cámara y el backend.
 
 ## Requisitos para desarrollo
 
@@ -75,14 +75,14 @@ El archivo se genera en:
 build\app\outputs\flutter-apk\app-release.apk
 ```
 
-Este APK es solamente el cliente móvil: necesita internet, el backend institucional y el servicio de IA para completar los flujos que dependen de ellos. **No distribuir este build como versión pública:** la configuración Gradle actual firma `release` con la clave de depuración. Antes de una distribución, configurar firma de release, revisar permisos y configuración de red de Android, y validar la compilación en un dispositivo objetivo.
+Este APK es solamente el cliente móvil: necesita internet y el backend institucional para login, historial y rankings. El análisis con IA no estará disponible mientras siga deshabilitado. **No distribuir este build como versión pública:** la configuración Gradle actual firma `release` con la clave de depuración. Antes de una distribución, configurar firma de release, revisar permisos y configuración de red de Android, y validar la compilación en un dispositivo objetivo.
 
 ## Servicios y dependencias externas
 
 | Servicio o componente | Uso en la app | Implementación |
 |---|---|---|
 | Backend institucional | Login, perfil, cierre de sesión, registro/consulta del historial y estadísticas para los rankings. | [`ServiceApi`](./lib/services/service_api.dart) usa `https://caa-fonseca.education/api`; las peticiones autenticadas envían el token como `Bearer`. |
-| IA generativa de Google | Analiza la foto y produce el contenido bilingüe y los ejemplos. | [`ModelIaConfig`](./lib/config/model_ia_config.dart) envía la imagen directamente desde el cliente usando `google_generative_ai`. Requiere internet y acceso válido al proveedor. |
+| IA generativa de Google | Integración temporalmente deshabilitada en v1.0.0; la clave está vacía y las solicitudes no se autentican. | [`ModelIaConfig`](./lib/config/model_ia_config.dart) contiene el cliente preparado, pero no se debe añadir una clave en la app. Para reactivarlo, trasladar la llamada a un backend/proxy seguro. |
 | WebSocket de rankings | Escucha actualizaciones del canal `programming.dashboard`; al recibirlas, actualiza rankings e historial. | [`RankingWebSocketService`](./lib/services/ranking_websocket_service.dart); vuelve a intentar la conexión tras una desconexión. |
 | Voz del dispositivo | Lee en voz alta el término o la oración en inglés. | [`VoiceConfig`](./lib/config/voice_config.dart) usa `flutter_tts` con idioma `en-US`; depende de las voces disponibles en el dispositivo. |
 | Almacenamiento local | Conserva token, datos del perfil e historial en el dispositivo para restaurar/mostrar datos guardados. | [`DatosTemporales`](./lib/models/datos_temporales.dart) usa `shared_preferences`. No es almacenamiento cifrado. |
@@ -160,8 +160,8 @@ Para cualquier función de audio, definir primero consentimiento y permisos de m
 
 ## Consideraciones antes de continuar o distribuir
 
-- **Credenciales de IA:** la configuración actual del proveedor está en el código cliente. No copiar ni publicar credenciales. Antes de distribuir la app, mover el acceso a un backend/proxy seguro y rotar cualquier credencial que haya quedado expuesta en el código o en el historial del repositorio.
-- **Datos personales e imágenes:** las credenciales se envían al backend institucional y las imágenes se envían directamente desde la app al proveedor de IA. Revisar autorización, consentimiento, tratamiento, retención y política institucional antes de usar datos reales.
+- **Credenciales de IA:** la credencial expuesta fue revocada y se retiró del snapshot publicado. No agregar una clave de reemplazo al cliente; reactivar el análisis solo mediante un backend/proxy seguro.
+- **Datos personales e imágenes:** antes de reactivar el análisis, revisar autorización, consentimiento, tratamiento y retención de imágenes y asegurar que la app no envíe credenciales al proveedor desde el cliente.
 - **Firma y red:** release aún usa firma debug y Android tiene habilitado tráfico HTTP sin cifrar. Revisar y endurecer la configuración de producción antes de distribuir.
 - **Datos locales:** SharedPreferences no cifra el token ni los datos persistidos. Considerar almacenamiento seguro y una política de expiración de sesión antes de un despliegue institucional.
 - **Entornos:** no existe separación documentada entre desarrollo, pruebas y producción. No cambiar el host de API o WebSocket por una URL local sin confirmar cómo accederá el dispositivo o emulador.
