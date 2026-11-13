@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_application_1/router/router_app.dart';
+import './services/services.dart';
+import 'package:flutter_application_1/themes/theme_apk.dart';
+import 'package:provider/provider.dart';
+
+void main(){
+  
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  runApp(ProviderApi());
+}
+
+class ProviderApi extends StatelessWidget{
+  const ProviderApi({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Estos proveedores viven por encima de las rutas para que sesión, tema y
+    // conectividad compartan una única instancia durante toda la navegación.
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_)=>ServiceApi()),
+      ChangeNotifierProvider(create: (_)=>ThemeApk()),
+      ChangeNotifierProvider(create: (_)=>NetworkService())
+    ],child: Myapp(),);
+  }
+}
+
+class Myapp extends StatelessWidget {
+  const Myapp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      initialRoute: RouterApp.rutaInicial,
+      routes: RouterApp.rutas,
+      debugShowCheckedModeBanner: false,
+      theme: Provider.of<ThemeApk>(context).temaGeneral,
+    );
+  }
+}
